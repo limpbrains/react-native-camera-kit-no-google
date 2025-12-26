@@ -95,3 +95,5 @@ dist/
 android/generated/ReactCodegen.podspec
 
 example/.rock/cache/
+
+.claude/

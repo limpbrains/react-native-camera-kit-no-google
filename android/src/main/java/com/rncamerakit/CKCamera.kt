@@ -44,7 +44,6 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
 import com.facebook.react.uimanager.UIManagerHelper
-import com.google.mlkit.vision.barcode.common.Barcode
 import com.rncamerakit.events.*
 
 class RectOverlay constructor(context: Context) :
@@ -330,35 +329,8 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
         val useCases = mutableListOf(preview, imageCapture)
 
     if (scanBarcode) {
-        val analyzer = QRCodeAnalyzer(analyzerBlock@{ barcodes, imageSize ->
-                if (barcodes.isEmpty()) {
-                    return@analyzerBlock
-                }
-
-                val barcodeFrame = barcodeFrame
-                if (barcodeFrame == null) {
-                    onBarcodeRead(barcodes)
-                    return@analyzerBlock
-                }
-
-                // Calculate scaling factors (image is always rotated by 90 degrees)
-                val scaleX = viewFinder.width.toFloat() / imageSize.height
-                val scaleY = viewFinder.height.toFloat() / imageSize.width
-
-                val filteredBarcodes = barcodes.filter { barcode ->
-                    val barcodeBoundingBox = barcode.boundingBox ?: return@filter false;
-                    val scaledBarcodeBoundingBox = Rect(
-                        (barcodeBoundingBox.left * scaleX).toInt(),
-                        (barcodeBoundingBox.top * scaleY).toInt(),
-                        (barcodeBoundingBox.right * scaleX).toInt(),
-                        (barcodeBoundingBox.bottom * scaleY).toInt()
-                    )
-                    barcodeFrame.frameRect.contains(scaledBarcodeBoundingBox)
-                }
-
-                if (filteredBarcodes.isNotEmpty()) {
-                    onBarcodeRead(filteredBarcodes)
-                }
+        val analyzer = QRCodeAnalyzer({ decodedValue ->
+                onBarcodeRead(decodedValue)
             }, scanThrottleDelay)
             imageAnalyzer!!.setAnalyzer(cameraExecutor, analyzer)
             useCases.add(imageAnalyzer)
@@ -509,12 +481,11 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
         rectOverlay.drawRectBounds(focusRects)
     }
 
-    private fun onBarcodeRead(barcodes: List<Barcode>) {
-        val codeFormat = CodeFormat.fromBarcodeType(barcodes.first().format);
+    private fun onBarcodeRead(decodedValue: String) {
         val surfaceId = UIManagerHelper.getSurfaceId(currentContext)
         UIManagerHelper
             .getEventDispatcherForReactTag(currentContext, id)
-            ?.dispatchEvent(ReadCodeEvent(surfaceId, id, barcodes.first().rawValue, codeFormat.code))
+            ?.dispatchEvent(ReadCodeEvent(surfaceId, id, decodedValue, CodeFormat.QR.code))
     }
 
     private fun onOrientationChange(orientation: Int) {
