@@ -3,7 +3,6 @@ package com.rncamerakit
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import android.util.Log
 import qr.QRDecoder
 import qr.QRDecodingException
 
@@ -17,9 +16,8 @@ class QRCodeAnalyzer(
     @ExperimentalGetImage
     override fun analyze(image: ImageProxy) {
         try {
-            Log.d("LLL", "11111")
-            val rgbData = imageProxyToRgb(image)
-            val decoded = QRDecoder.decode(image.width, image.height, rgbData)
+            val grayscaleData = extractYPlane(image)
+            val decoded = QRDecoder.decode(image.width, image.height, grayscaleData)
 
             // Throttle callback invocations based on scanThrottleDelay (ms)
             val now = System.currentTimeMillis()
@@ -30,70 +28,38 @@ class QRCodeAnalyzer(
             lastQRDetectedTime = now
             onQRCodeDetected(decoded)
         } catch (e: QRDecodingException) {
-            Log.d("LLL", "QR decode error: ${e.message}", e)
             // No QR code found or decoding error - this is expected for most frames
         } finally {
             image.close()
         }
     }
 
-    private fun imageProxyToRgb(image: ImageProxy): ByteArray {
-        val yBuffer = image.planes[0].buffer
-        val uBuffer = image.planes[1].buffer
-        val vBuffer = image.planes[2].buffer
-
-        val ySize = yBuffer.remaining()
-        val uSize = uBuffer.remaining()
-        val vSize = vBuffer.remaining()
-
-        val yBytes = ByteArray(ySize)
-        val uBytes = ByteArray(uSize)
-        val vBytes = ByteArray(vSize)
-
-        yBuffer.get(yBytes)
-        uBuffer.get(uBytes)
-        vBuffer.get(vBytes)
-
+    /**
+     * Extracts the Y (luminance) plane from a YUV_420_888 ImageProxy.
+     * The Y plane is already grayscale data (1 byte per pixel).
+     * Handles row stride padding when rowStride > width.
+     */
+    private fun extractYPlane(image: ImageProxy): ByteArray {
+        val yPlane = image.planes[0]
+        val yBuffer = yPlane.buffer
+        val rowStride = yPlane.rowStride
         val width = image.width
         val height = image.height
-        val rgbBytes = ByteArray(width * height * 3)
+        val yBytes = ByteArray(width * height)
 
-        val yRowStride = image.planes[0].rowStride
-        val uvRowStride = image.planes[1].rowStride
-        val uvPixelStride = image.planes[1].pixelStride
-
-        var rgbIndex = 0
-        for (row in 0 until height) {
-            for (col in 0 until width) {
-                val yIndex = row * yRowStride + col
-                val uvRow = row / 2
-                val uvCol = col / 2
-                val uvIndex = uvRow * uvRowStride + uvCol * uvPixelStride
-
-                val y = yBytes[yIndex].toInt() and 0xFF
-                val u = (if (uvIndex < uBytes.size) uBytes[uvIndex].toInt() else 128) and 0xFF
-                val v = (if (uvIndex < vBytes.size) vBytes[uvIndex].toInt() else 128) and 0xFF
-
-                // YUV to RGB conversion
-                val yVal = y - 16
-                val uVal = u - 128
-                val vVal = v - 128
-
-                var r = (1.164 * yVal + 1.596 * vVal).toInt()
-                var g = (1.164 * yVal - 0.392 * uVal - 0.813 * vVal).toInt()
-                var b = (1.164 * yVal + 2.017 * uVal).toInt()
-
-                // Clamp values to 0-255
-                r = r.coerceIn(0, 255)
-                g = g.coerceIn(0, 255)
-                b = b.coerceIn(0, 255)
-
-                rgbBytes[rgbIndex++] = r.toByte()
-                rgbBytes[rgbIndex++] = g.toByte()
-                rgbBytes[rgbIndex++] = b.toByte()
+        if (rowStride == width) {
+            // Fast path: contiguous data, no padding
+            yBuffer.rewind()
+            yBuffer.get(yBytes, 0, width * height)
+        } else {
+            // Slow path: handle row stride padding
+            yBuffer.rewind()
+            for (row in 0 until height) {
+                yBuffer.position(row * rowStride)
+                yBuffer.get(yBytes, row * width, width)
             }
         }
 
-        return rgbBytes
+        return yBytes
     }
 }
