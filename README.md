@@ -1,20 +1,48 @@
 <h1 align="center">
-    🎈 React Native Camera Kit
+    🎈 React Native Camera Kit (No Google)
 </h1>
 
 <p align="center">
   A <strong>high performance, easy to use, rock solid</strong><br>
-  camera library for React Native apps.
+  camera library for React Native apps.<br>
+  <strong>No Google ML Kit dependency.</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/teslamotors/react-native-camera-kit/blob/master/LICENSE">
+  <a href="https://github.com/limpbrains/react-native-camera-kit-no-google/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="React Native Camera Kit is released under the MIT license." />
   </a>
-  <a href="https://www.npmjs.org/package/react-native-camera-kit">
-    <img src="https://badge.fury.io/js/react-native-camera-kit.svg" alt="Current npm package version." />
+  <a href="https://www.npmjs.org/package/react-native-camera-kit-no-google">
+    <img src="https://badge.fury.io/js/react-native-camera-kit-no-google.svg" alt="Current npm package version." />
   </a>
 </p>
+
+> **⚠️ Fork Notice**
+>
+> This is a fork of [teslamotors/react-native-camera-kit](https://github.com/teslamotors/react-native-camera-kit) with **Google ML Kit removed** from Android.
+>
+> **Why?** Google ML Kit is closed source. This fork uses a completely open source pure Kotlin QR decoder instead.
+
+## Key Differences from Original
+
+| Feature | Original | This Fork |
+|---------|----------|-----------|
+| Android barcode library | Google ML Kit (closed source) | Pure Kotlin ([limpbrains/qr](https://github.com/limpbrains/qr)) |
+| Source code | Closed source (ML Kit) | Fully open source |
+| Google Play Services | Required | Not required |
+| Barcode formats | Multiple formats | **QR codes only** |
+
+### Limitations
+
+- **Android barcode scanning supports QR codes only** (no EAN, UPC, Code128, etc.)
+- iOS barcode scanning is unchanged (uses native AVFoundation, supports all formats)
+
+### QR Decoder Attribution
+
+The Android QR decoder is based on:
+- [limpbrains/qr](https://github.com/limpbrains/qr) - Kotlin QR code reader library
+- [paulmillr/qr](https://github.com/paulmillr/qr) - Original JavaScript implementation by Paul Miller
+
 <table>
   <tr>
     <td>
@@ -24,8 +52,9 @@
       <ul>
         <li><h3>Cross Platform (iOS and Android)</h3></li>
         <li><h3>Optimized for performance and high photo capture rate</h3></li>
-        <li><h3>QR / Barcode scanning support</h3></li>
+        <li><h3>QR Code scanning support (QR only on Android)</h3></li>
         <li><h3>Camera preview support in iOS simulator</h3></li>
+        <li><h3>No Google dependencies</h3></li>
       </ul>
     </td>
   </tr>
@@ -34,7 +63,7 @@
 ## Installation (RN > 0.60)
 
 ```bash
-yarn add react-native-camera-kit
+yarn add react-native-camera-kit-no-google
 ```
 
 ```bash
@@ -143,7 +172,7 @@ Add the following usage descriptions to your `Info.plist` (usually found at: `io
 Barebones camera component if you need advanced/customized interface
 
 ```ts
-import { Camera, CameraType } from 'react-native-camera-kit';
+import { Camera, CameraType } from 'react-native-camera-kit-no-google';
 ```
 
 ```tsx
@@ -184,7 +213,7 @@ Additionally, the Camera can be used for barcode scanning
 | `onZoom`                       | Function                         | Callback when user makes a pinch gesture, regardless of what the `zoom` prop was set to. Returned event contains `zoom`. Ex: `onZoom={(e) => console.log(e.nativeEvent.zoom)}`.                                                                                                                                                                                                                                                                            |
 | `torchMode`                    | `'on'`/`'off'`                   | Toggle flash light when camera is active. Default: `off`                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `cameraType`                   | CameraType.Back/CameraType.Front | Choose what camera to use. Default: `CameraType.Back`                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `onOrientationChange`          | Function                         | Callback when physical device orientation changes. Returned event contains `orientation`. Ex: `onOrientationChange={(event) => console.log(event.nativeEvent.orientation)}`. Use `import { Orientation } from 'react-native-camera-kit'; if (event.nativeEvent.orientation === Orientation.PORTRAIT) { ... }` to understand the new value                                                                                                                  |
+| `onOrientationChange`          | Function                         | Callback when physical device orientation changes. Returned event contains `orientation`. Ex: `onOrientationChange={(event) => console.log(event.nativeEvent.orientation)}`. Use `import { Orientation } from 'react-native-camera-kit-no-google'; if (event.nativeEvent.orientation === Orientation.PORTRAIT) { ... }` to understand the new value                                                                                                                  |
 | **Android only**               |
 | `onError`                      | Function                         | Android only. Callback when camera fails to initialize. Ex: `onError={(e) => console.log(e.nativeEvent.errorMessage)}`.                                                                                                                                                                                                                                                                                                                                    |
 | `shutterPhotoSound`            | `boolean`                        | Android only. Enable or disable the shutter sound when capturing a photo. Default: `true`                                                                                                                                                                                                                                                                                                                                                                  |
