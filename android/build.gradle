@@ -66,8 +66,9 @@ dependencies {
     // If you want to additionally use the CameraX Extensions library
     // implementation "androidx.camera:camera-extensions:${camerax_version}"
 
-    implementation 'com.google.mlkit:barcode-scanning:17.3.0'
+    implementation 'com.github.limpbrains:qr:v0.0.1'
 }
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }

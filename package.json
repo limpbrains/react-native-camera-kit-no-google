@@ -1,8 +1,8 @@
 {
-  "name": "react-native-camera-kit",
+  "name": "react-native-camera-kit-no-google",
   "repository": {
     "type": "git",
-    "url": "https://github.com/teslamotors/react-native-camera-kit.git"
+    "url": "https://github.com/limpbrains/react-native-camera-kit-no-google.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
