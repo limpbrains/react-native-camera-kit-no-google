@@ -46,6 +46,46 @@ const BarcodeExample = ({ onBack }: { onBack: () => void }) => {
 
   const [cameraType, setCameraType] = useState(CameraType.Back);
   const [barcode, setBarcode] = useState<string>('');
+  const [fps, setFps] = useState(0);
+  const [scanCount, setScanCount] = useState(0);
+  const [scansPerSec, setScansPerSec] = useState(0);
+
+  // FPS counter using requestAnimationFrame
+  useEffect(() => {
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let animationId: number;
+
+    const measureFps = () => {
+      frameCount++;
+      const now = performance.now();
+      const elapsed = now - lastTime;
+
+      if (elapsed >= 1000) {
+        setFps(Math.round((frameCount * 1000) / elapsed));
+        frameCount = 0;
+        lastTime = now;
+      }
+
+      animationId = requestAnimationFrame(measureFps);
+    };
+
+    animationId = requestAnimationFrame(measureFps);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
+  // Scans per second counter
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setScansPerSec(scanCount);
+      setScanCount(0);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [scanCount]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -109,6 +149,11 @@ const BarcodeExample = ({ onBack }: { onBack: () => void }) => {
             resizeMode="contain"
           />
         </TouchableOpacity>
+
+        <View style={styles.fpsContainer}>
+          <Text style={styles.fpsText}>{fps} FPS</Text>
+          <Text style={styles.fpsText}>{scansPerSec} scans/s</Text>
+        </View>
       </SafeAreaView>
 
       <View style={styles.cameraContainer}>
@@ -119,7 +164,7 @@ const BarcodeExample = ({ onBack }: { onBack: () => void }) => {
           flashMode={flashData?.mode}
           zoomMode="on"
           focusMode="on"
-          scanThrottleDelay={2000}
+          scanThrottleDelay={0}
           torchMode={torchMode ? 'on' : 'off'}
           onOrientationChange={(e) => {
             // We recommend locking the camera UI to portrait (using a different library)
@@ -150,11 +195,8 @@ const BarcodeExample = ({ onBack }: { onBack: () => void }) => {
           showFrame
           barcodeFrameSize={{ width: 300, height: 150 }}
           onReadCode={(event) => {
-            Vibration.vibrate(100);
+            setScanCount((prev) => prev + 1);
             setBarcode(event.nativeEvent.codeStringValue);
-            console.log('barcode', event.nativeEvent.codeStringValue);
-            console.log('codeFormat', event.nativeEvent.codeFormat);
-
           }}
         />
       </View>
@@ -253,5 +295,18 @@ const styles = StyleSheet.create({
     padding: 10,
     color: 'white',
     fontSize: 20,
+  },
+  fpsContainer: {
+    backgroundColor: '#222',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  fpsText: {
+    color: '#0f0',
+    fontSize: 12,
+    fontFamily: 'monospace',
   },
 });
