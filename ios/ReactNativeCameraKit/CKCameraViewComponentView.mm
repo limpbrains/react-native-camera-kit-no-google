@@ -242,13 +242,30 @@ static id CKConvertFollyDynamicToId(const folly::dynamic &dyn)
         _view.maxZoom = newProps.maxZoom > -1 ? @(newProps.maxZoom) : nil;
         [changedProps addObject:@"maxZoom"];
     }
+    if (oldViewProps.iOsSleepBeforeStarting != newProps.iOsSleepBeforeStarting) {
+        _view.iOsSleepBeforeStarting = newProps.iOsSleepBeforeStarting >= 0 ? @(newProps.iOsSleepBeforeStarting) : nil;
+        [changedProps addObject:@"iOsSleepBeforeStarting"];
+    }
     float barcodeWidth = newProps.barcodeFrameSize.width;
     float barcodeHeight = newProps.barcodeFrameSize.height;
     if (barcodeWidth != [_view.barcodeFrameSize[@"width"] floatValue] || barcodeHeight != [_view.barcodeFrameSize[@"height"] floatValue]) {
         _view.barcodeFrameSize = @{@"width": @(barcodeWidth), @"height": @(barcodeHeight)};
         [changedProps addObject:@"barcodeFrameSize"];
     }
-    
+    // Since viewprops optional props isn't supported in all RN versions,
+    // we assume empty arrays mean it's not defined / ignore changes to it.
+    // if the user/dev wants to NOT define the prop, they can simply use scanBarcode={false}
+    if (!newProps.allowedBarcodeTypes.empty()) {
+        folly::dynamic allowedBarcodeTypesDynamic = folly::dynamic::array();
+        for (const auto& type : newProps.allowedBarcodeTypes) {
+            allowedBarcodeTypesDynamic.push_back(type);
+        }
+        id allowedBarcodeTypes = CKConvertFollyDynamicToId(allowedBarcodeTypesDynamic);
+        if (allowedBarcodeTypes != nil && [allowedBarcodeTypes isKindOfClass:NSArray.class]) {
+            _view.allowedBarcodeTypes = allowedBarcodeTypes;
+            [changedProps addObject:@"allowedBarcodeTypes"];
+        }
+    }
     
     [super updateProps:props oldProps:oldProps];
     [_view didSetProps:changedProps];

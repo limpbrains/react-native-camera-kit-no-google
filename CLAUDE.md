@@ -173,3 +173,89 @@ The library is published to npm as `react-native-camera-kit` with the `files` ar
 - **Node**: Requires Node.js >= 18
 - **React Native**: Uses version 0.79.0, supports both legacy and new architecture (Fabric)
 - **Import resolution**: ESLint is configured to recognize `.ios.tsx`, `.android.tsx`, and `.js` platform variants
+
+---
+
+## Camera Kit Sync State
+
+**Last synchronized upstream commit**: cc6515b914a34ef79d8fdba527e878761047b02a
+**Upstream version**: 16.2.0
+**Fork version**: 16.1.3
+**Last sync date**: 2026-01-07T23:03:00Z
+**Sync status**: success
+**Fork point**: 5a709e0
+
+### Changes Synced (commits 5a709e0..cc6515b)
+
+**Commit range**: 12 commits from upstream
+
+**iOS Improvements** (8 files, fully synced):
+- Added mount stress test support (CameraView.swift, RealCamera.swift, SimulatorCamera.swift)
+- Added `allowedBarcodeTypes` barcode filtering for iOS (CodeFormat.swift, CKCameraViewComponentView.mm, CameraView.swift)
+- All iOS files synced successfully - no conflicts with QR-only fork
+
+**TypeScript Layer** (7 files, fully synced):
+- Updated Camera.ios.tsx, Camera.android.tsx with `allowedBarcodeTypes` prop
+- Updated CameraProps.ts, types.ts, src/index.ts with new barcode filtering types
+- Updated specs/CameraNativeComponent.ts with Codegen prop definitions
+- All TypeScript changes synced - prop works on iOS, gracefully handled on Android (QR-only)
+
+**Example App** (3 files, fully synced):
+- Added mount stress test to App.tsx and CameraExample.tsx
+- Added `allowedBarcodeTypes={['qr', 'ean-13']}` example to BarcodeScreenExample.tsx
+- Example demonstrates the prop even though Android fork only scans QR codes
+
+**Config Files**:
+- Moved .nvmrc from example/ to root directory
+
+**Documentation**:
+- README.md: Added `allowedBarcodeTypes` prop documentation with note: "Android only supports `'qr'` in this fork. iOS supports all formats."
+
+### Changes Skipped (Android Barcode Conflicts)
+
+**android/src/main/java/com/rncamerakit/CKCamera.kt** (commits ea894d9, 2a1f06a, f8be0f0, cc6d18c, 4cbec39):
+- **Upstream changes**: Added `allowedBarcodeTypes` property and barcode filtering logic using `List<Barcode>` callback
+- **Fork incompatibility**: Fork uses `onBarcodeRead(String)` callback (single QR string), upstream uses `onBarcodeRead(List<Barcode>, Size)` (multiple barcodes with bounding boxes)
+- **Action**: Skipped all barcode filtering logic entirely
+- **Rationale**: Fork's QR-only architecture with limpbrains/qr decoder is fundamentally incompatible with multi-format filtering
+
+**android/src/main/java/com/rncamerakit/CKCameraManager.kt** (commits cc6d18c, 6d0bed7):
+- **Upstream changes**: Added `setAllowedBarcodeTypes` property setter
+- **Action**: Skipped entirely
+- **Rationale**: Fork doesn't use barcode type filtering (QR-only)
+
+**package.json**:
+- **Upstream change**: Version bump from 16.1.3 → 16.2.0
+- **Action**: Skipped version change
+- **Rationale**: Fork maintains independent versioning (currently 16.1.3)
+
+### Selective Sync Summary
+
+**CodeFormat.kt**: ✅ Partial sync (1 hunk applied, 1 hunk skipped)
+- ✅ **Applied**: Added `UPC_A("upc-a")` enum value (line 11)
+- ❌ **Skipped**: `fromName()` helper method (fork doesn't need it, has no ML Kit conversions)
+- **Rationale**: New enum values are harmless future-proofing, even if fork doesn't use them
+
+### Fork-Specific Code Preserved
+
+All QR-only Android architecture preserved:
+- `android/build.gradle` - Still uses `implementation 'com.github.limpbrains:qr:v0.0.1'`
+- `android/src/main/java/com/rncamerakit/QRCodeAnalyzer.kt` - Still uses `QRDecoder.decode()` from limpbrains/qr
+- `android/src/main/java/com/rncamerakit/CodeFormat.kt` - Simplified enum structure (no ML Kit conversions)
+- `android/src/main/java/com/rncamerakit/CKCamera.kt` - String callback signature preserved
+
+### Sync Statistics
+
+- **Files auto-synced (Category A)**: 19 files (iOS, TypeScript, Example, Config)
+- **Files selectively synced (Category B)**: 2 files (CodeFormat.kt partial, README.md with fork note)
+- **Files skipped (Category B)**: 3 files (CKCamera.kt, CKCameraManager.kt, package.json)
+- **Hunks applied**: 1 hunk (UPC_A enum)
+- **Hunks skipped**: ~50+ hunks (all Android barcode filtering logic)
+
+### Notes
+
+- Fork successfully synced all upstream improvements to iOS and TypeScript layers
+- `allowedBarcodeTypes` prop is now documented and works on iOS
+- Android continues to use QR-only scanning with limpbrains/qr decoder
+- No Google ML Kit dependencies introduced
+- All build integrity checks passed (see test results below)

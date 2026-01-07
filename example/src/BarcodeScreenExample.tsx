@@ -193,6 +193,7 @@ const BarcodeExample = ({ onBack }: { onBack: () => void }) => {
           frameColor="white"
           scanBarcode
           showFrame
+          allowedBarcodeTypes={['qr', 'ean-13']}
           barcodeFrameSize={{ width: 300, height: 150 }}
           onReadCode={(event) => {
             setScanCount((prev) => prev + 1);

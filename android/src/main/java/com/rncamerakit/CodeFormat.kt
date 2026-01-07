@@ -8,6 +8,7 @@ enum class CodeFormat(val code: String) {
     EAN_13("ean-13"),
     EAN_8("ean-8"),
     ITF("itf"),
+    UPC_A("upc-a"),
     UPC_E("upc-e"),
     QR("qr"),
     PDF_417("pdf-417"),
