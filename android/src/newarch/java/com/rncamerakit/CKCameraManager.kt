@@ -144,26 +144,20 @@ class CKCameraManager(context: ReactApplicationContext) : SimpleViewManager<CKCa
         view.setShutterPhotoSound(enabled);
     }
 
-    @ReactProp(name = "allowedBarcodeTypes")
-    override fun setAllowedBarcodeTypes(view: CKCamera, types: ReadableArray?) {
-        view.setAllowedBarcodeTypes(types)
-    }
-
     @ReactProp(name = "scanThrottleDelay")
     override fun setScanThrottleDelay(view: CKCamera?, value: Int) {
         view?.setScanThrottleDelay(value)
     }
 
     @ReactProp(name = "allowedBarcodeTypes")
-    override fun setAllowedBarcodeTypes(view: CKCamera?, types: ReadableArray?) {
+    override fun setAllowedBarcodeTypes(view: CKCamera, types: ReadableArray?) {
         // Fork note: Android uses limpbrains/qr which is QR-only, no barcode filtering.
         // This prop is accepted for API compatibility but has no effect on Android.
         // iOS implementation supports this prop.
+        view.setAllowedBarcodeTypes(types)
     }
 
     // Methods only available on iOS
-    override fun setIOsSleepBeforeStarting(view: CKCamera?, value: Int) = Unit
-
     override fun setRatioOverlay(view: CKCamera?, value: String?) = Unit
 
     override fun setRatioOverlayColor(view: CKCamera?, value: Int?) = Unit
