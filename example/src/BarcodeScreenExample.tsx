@@ -198,6 +198,8 @@ const BarcodeExample = ({ onBack }: { onBack: () => void }) => {
           onReadCode={(event) => {
             setScanCount((prev) => prev + 1);
             setBarcode(event.nativeEvent.codeStringValue);
+            console.log('barcode', event.nativeEvent.codeStringValue);
+            console.log('codeFormat', event.nativeEvent.codeFormat);
           }}
         />
       </View>
@@ -276,8 +278,7 @@ const styles = StyleSheet.create({
   backBtnContainer: {
     alignItems: 'flex-start',
   },
-  captureButtonContainer: {
-  },
+  captureButtonContainer: {},
   textNumberContainer: {
     position: 'absolute',
     top: 0,

@@ -28,6 +28,7 @@ import androidx.lifecycle.LifecycleObserver
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
 import com.rncamerakit.barcode.BarcodeFrame
@@ -108,6 +109,7 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
     private var frameColor = Color.GREEN
     private var laserColor = Color.RED
     private var barcodeFrameSize: Size? = null
+    private var allowedBarcodeTypes: Array<CodeFormat>? = null
 
     private fun getActivity() : Activity {
         return currentContext.currentActivity!!
@@ -338,8 +340,8 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
 
         val useCases = mutableListOf(preview, imageCapture)
 
-    if (scanBarcode) {
-        val analyzer = QRCodeAnalyzer({ decodedValue ->
+        if (scanBarcode) {
+            val analyzer = QRCodeAnalyzer({ decodedValue ->
                 onBarcodeRead(decodedValue)
             }, scanThrottleDelay)
             imageAnalyzer!!.setAnalyzer(cameraExecutor, analyzer)
@@ -464,8 +466,8 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
 
                     val imageFile = File(path)
                     val imageSize = imageFile.length() // size in bytes
-                    imageInfo.putDouble("size", imageSize.toDouble()) 
-                    
+                    imageInfo.putDouble("size", imageSize.toDouble())
+
                     promise.resolve(imageInfo)
                 } catch (ex: Exception) {
                     Log.e(TAG, "Error while saving or decoding saved photo: ${ex.message}", ex)
@@ -684,6 +686,26 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
         }
     }
 
+    fun setAllowedBarcodeTypes(types: ReadableArray?) {
+        if (types == null || types.size() == 0) {
+            allowedBarcodeTypes = emptyArray()
+            return
+        }
+
+        // Convert only valid CodeFormat values
+        val converted = mutableListOf<CodeFormat>()
+
+        for (i in 0 until types.size()) {
+            val name = types.getString(i) ?: continue
+            val format = CodeFormat.fromName(name)
+            if (format != null) {
+                converted.add(format)
+            }
+        }
+
+        allowedBarcodeTypes = converted.toTypedArray()
+    }
+
     private fun convertDeviceHeightToSupportedAspectRatio(actualWidth: Int, actualHeight: Int): Int {
         val maxScreenRatio = 16 / 9f
         return (if (actualHeight / actualWidth > maxScreenRatio) actualWidth * maxScreenRatio else actualHeight).toInt()
@@ -702,6 +724,10 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
                 42 // random callback identifier
         )
         return false
+    }
+
+    private fun convertAllowedBarcodeTypes(): Set<Int> {
+        return allowedBarcodeTypes?.map { it.toBarcodeType() }?.toSet() ?: emptySet()
     }
 
     companion object {

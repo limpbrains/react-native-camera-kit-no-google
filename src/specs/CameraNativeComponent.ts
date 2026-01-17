@@ -10,6 +10,9 @@ import type {
   Int32,
   WithDefault
 } from 'react-native/Libraries/Types/CodegenTypes';
+
+// While this import is deprecated, official docs still shows this as valid
+// and the alternative doesn't work (import doesn't exist for this RN version)
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 
 type OnReadCodeData = {
@@ -46,7 +49,7 @@ export interface NativeProps extends ViewProps {
   resetFocusWhenMotionDetected?: boolean;
   resizeMode?: string;
   scanThrottleDelay?: WithDefault<Int32, -1>;
-  iOsSleepBeforeStarting?: WithDefault<Int32, -1>;
+  iOsDeferredStart?: boolean;
   barcodeFrameSize?: { width?: WithDefault<Float, 300>; height?: WithDefault<Float, 150> };
   shutterPhotoSound?: boolean;
   onOrientationChange?: DirectEventHandler<OnOrientationChangeData>;

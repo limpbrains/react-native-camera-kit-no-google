@@ -144,6 +144,11 @@ class CKCameraManager(context: ReactApplicationContext) : SimpleViewManager<CKCa
         view.setShutterPhotoSound(enabled);
     }
 
+    @ReactProp(name = "allowedBarcodeTypes")
+    override fun setAllowedBarcodeTypes(view: CKCamera, types: ReadableArray?) {
+        view.setAllowedBarcodeTypes(types)
+    }
+
     @ReactProp(name = "scanThrottleDelay")
     override fun setScanThrottleDelay(view: CKCamera?, value: Int) {
         view?.setScanThrottleDelay(value)
@@ -168,6 +173,8 @@ class CKCameraManager(context: ReactApplicationContext) : SimpleViewManager<CKCa
     override fun setResetFocusWhenMotionDetected(view: CKCamera?, value: Boolean) = Unit
 
     override fun setResizeMode(view: CKCamera?, value: String?) = Unit
+
+    override fun setIOsDeferredStart(view: CKCamera?, value: Boolean) = Unit
 
     override fun setMaxPhotoQualityPrioritization(view: CKCamera?, value: String?) = Unit
 }
