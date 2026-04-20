@@ -180,7 +180,7 @@ The library is published to npm as `react-native-camera-kit` with the `files` ar
 
 **Last synchronized upstream commit**: 8e5149a6e6d3902ae87dad50da0d06ec2c61d2b8
 **Upstream version**: 17.0.1
-**Fork version**: 17.0.1
+**Fork version**: 17.0.2
 **Last sync date**: 2026-01-17
 **Sync status**: success
 
