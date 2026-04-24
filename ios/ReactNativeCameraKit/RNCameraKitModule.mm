@@ -58,6 +58,10 @@ RCT_EXPORT_METHOD(capture:(NSDictionary *)options tag:(nonnull NSNumber *)tag re
         [CKCameraManager requestDeviceCameraAuthorization:resolve reject:reject];
 }
 
+RCT_EXPORT_METHOD(detectQRCodeInImage:(NSString *)base64 resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    [CKCameraManager detectQRCodeInImage:base64 resolve:resolve reject:reject];
+}
+
  // Thanks to this guard, we won't compile this code when we build for the old architecture.
 #ifdef RCT_NEW_ARCH_ENABLED
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Button, Alert, Te
 
 import BarcodeScreenExample from './BarcodeScreenExample';
 import CameraExample from './CameraExample';
+import DetectQRExample from './DetectQRExample';
 
 const App = () => {
   const [example, setExample] = useState<any>(undefined);
@@ -23,6 +24,7 @@ const App = () => {
         <Text style={styles.headerText}>React Native Camera Kit</Text>
         <Button title="Camera" onPress={() => setExample(<CameraExample onBack={onBack} />)}></Button>
         <Button title="Barcode Scanner" onPress={() => setExample(<BarcodeScreenExample onBack={onBack} />)}></Button>
+        <Button title="Detect QR from Image" onPress={() => setExample(<DetectQRExample onBack={onBack} />)}></Button>
         <View>
           <Text style={[styles.stressHeader, { marginTop: 12 }]}>Mount Stress Test</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
