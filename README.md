@@ -237,6 +237,40 @@ Additionally, the Camera can be used for barcode scanning
 | `frameColor`                    | Color                                  | Color of barcode scanner frame visualization. Default: `yellow`                                                                                                                                                                                                                                                                                                                                                                                            |
 | `onReadCode`                    | Function                               | Callback when scanner successfully reads barcode. Returned event contains `codeStringValue`. Default: `null`. Ex: `onReadCode={(event) => console.log(event.nativeEvent.codeStringValue)}`                                                                                                                                                                                                                                                                 |
 
+### detectQRCodeInImage(base64)
+
+Detect and decode a QR code from a static image. Takes a base64-encoded image string. Returns a promise that resolves with the decoded string, or `null` if the image is valid but contains no QR code. Rejects only on actual errors (invalid base64, undecodable image data, detector failure).
+
+```ts
+import { detectQRCodeInImage } from 'react-native-camera-kit-no-google';
+
+try {
+  const decoded = await detectQRCodeInImage(base64ImageData);
+  if (decoded === null) {
+    // Image was valid but no QR code was found
+  } else {
+    console.log('QR code:', decoded);
+  }
+} catch (e) {
+  // Invalid image data or internal detection failure — e.message has details
+}
+```
+
+Rejection error codes: `E_INVALID_IMAGE` (bad base64 or undecodable image) and `E_QR_DETECTION_FAILED` (Android: QR decoder error; iOS: Vision framework error or detector init failure).
+
+This API is exclusive to this fork and is not available in the original react-native-camera-kit.
+
+It does **not** require camera permissions — it works purely on image data. Useful for detecting QR codes from:
+- Images picked from the photo library
+- Clipboard images
+- Files received via deep links or share extensions
+
+| Platform | Implementation |
+|----------|---------------|
+| iOS (device) | Vision framework (`VNDetectBarcodesRequest`) |
+| iOS (simulator) | CoreImage (`CIDetector`) |
+| Android | [limpbrains/qr](https://github.com/limpbrains/qr) |
+
 ### Imperative API
 
 _Note: Must be called on a valid camera ref_

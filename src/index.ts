@@ -1,6 +1,7 @@
 import { NativeModules } from 'react-native';
 
 import Camera from './Camera';
+import NativeCameraKitModule from './specs/NativeCameraKitModule';
 import {
   CameraType,
   type CameraApi,
@@ -14,6 +15,10 @@ import {
 } from './types';
 
 const { CameraKit } = NativeModules;
+
+export const detectQRCodeInImage = (base64: string): Promise<string | null> => {
+  return NativeCameraKitModule.detectQRCodeInImage(base64);
+};
 
 // Start with portrait/pointing up, increment while moving counter-clockwise
 export const Orientation = {

@@ -18,6 +18,7 @@ export interface Spec extends TurboModule {
   capture(options?: UnsafeObject, tag?: Double): Promise<CaptureData>;
   requestDeviceCameraAuthorization: () => Promise<boolean>;
   checkDeviceCameraAuthorizationStatus: () => Promise<boolean>;
+  detectQRCodeInImage(base64: string): Promise<string | null>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('RNCameraKitModule');

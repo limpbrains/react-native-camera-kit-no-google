@@ -2,6 +2,7 @@ package com.rncamerakit
 
 import com.facebook.react.bridge.*
 import com.facebook.react.uimanager.UIManagerHelper
+import java.util.concurrent.Executors
 
 /**
  * Native module for interacting with the camera in React Native applications.
@@ -36,6 +37,8 @@ class RNCameraKitModule(private val reactContext: ReactApplicationContext) : Rea
         const val LANDSCAPE_RIGHT = 3 // ➡️
 
         const val REACT_CLASS = "RNCameraKitModule"
+
+        private val qrDecodeExecutor = Executors.newCachedThreadPool()
     }
 
     override fun getName(): String {
@@ -59,6 +62,19 @@ class RNCameraKitModule(private val reactContext: ReactApplicationContext) : Rea
     fun requestDeviceCameraAuthorization(promise: Promise?) = Unit
 
     fun checkDeviceCameraAuthorizationStatus(promise: Promise?) = Unit
+
+    @ReactMethod
+    fun detectQRCodeInImage(base64: String, promise: Promise) {
+        qrDecodeExecutor.execute {
+            try {
+                promise.resolve(ImageQRCodeDecoder.decode(base64))
+            } catch (e: IllegalArgumentException) {
+                promise.reject("E_INVALID_IMAGE", e.message ?: "Invalid image data", e)
+            } catch (e: Exception) {
+                promise.reject("E_QR_DETECTION_FAILED", e.message ?: "QR detection failed", e)
+            }
+        }
+    }
 
     /**
      * Captures a photo using the camera.
