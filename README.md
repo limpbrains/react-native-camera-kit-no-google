@@ -5,7 +5,7 @@
 <p align="center">
   A <strong>high performance, easy to use, rock solid</strong><br>
   camera library for React Native apps.<br>
-  <strong>No Google ML Kit dependency.</strong>
+  <strong>No Google dependencies.</strong>
 </p>
 
 <p align="center">
@@ -53,6 +53,7 @@ The Android QR decoder is based on:
         <li><h3>Cross Platform (iOS and Android)</h3></li>
         <li><h3>Optimized for performance and high photo capture rate</h3></li>
         <li><h3>QR Code scanning support (QR only on Android)</h3></li>
+        <li><h3>Face detection support (iOS only)</h3></li>
         <li><h3>Camera preview support in iOS simulator</h3></li>
         <li><h3>No Google dependencies</h3></li>
       </ul>
@@ -199,6 +200,24 @@ Additionally, the Camera can be used for barcode scanning
 />
 ```
 
+#### Face Detection
+
+Detect faces in real time on **iOS** using Apple Vision.
+
+> **Android:** Face detection is not available in this fork (upstream uses Google ML Kit). Enabling `faceDetectionEnabled` on Android fires `onFaceDetectionInstallStatus` once with `'unavailable'`.
+
+```tsx
+<Camera
+  ...
+  faceDetectionEnabled={true}
+  faceDetectionThrottleMs={100} // optional, default 100ms
+  onFaceDetected={(event) => {
+    // event.nativeEvent.faces: FaceData[]
+    // each face: { id, yaw, pitch, roll, boundsX, boundsY, boundsWidth, boundsHeight }
+  }}
+/>
+```
+
 ### Camera Props (Optional)
 
 | Props                           | Type                                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -226,7 +245,7 @@ Additionally, the Camera can be used for barcode scanning
 | `resizeMode`                    | `'cover' / 'contain'`                  | Determines the scaling and cropping behavior of content within the view. `cover` (resizeAspectFill on iOS) scales the content to fill the view completely, potentially cropping content if its aspect ratio differs from the view. `contain` (resizeAspect on iOS) scales the content to fit within the view's bounds without cropping, ensuring all content is visible but may introduce letterboxing. Default behavior depends on the specific use case. |
 | `scanThrottleDelay`             | `number`                               | Duration between scan detection in milliseconds. Default 2000 (2s)                                                                                                                                                                                                                                                                                                                                                                                         |
 | `maxPhotoQualityPrioritization` | `'balanced'` / `'quality'` / `'speed'` | [iOS 13 and newer](https://developer.apple.com/documentation/avfoundation/avcapturephotooutput/3182995-maxphotoqualityprioritization). `'speed'` provides a 60-80% median capture time reduction vs 'quality' setting. Tested on iPhone 6S Max (66% faster) and iPhone 15 Pro Max (76% faster!). Default `balanced`                                                                                                                                        |
-| `iOsDeferredStart`              | `boolean`                              | iOS 26+ only. Enables `AVCaptureOutput.deferredStartEnabled` when supported to get the preview visible faster. Default `true`. When enabled, the first capture can be delayed by a few hundred milliseconds. Ignored on Android and on older iOS versions.                                                                                                                                                                                                   |
+| `iOsDeferredStart`              | `boolean`                              | iOS 26+ only. Enables `AVCaptureOutput.deferredStartEnabled` when supported to get the preview visible faster. Default `true`. When enabled, the first capture can be delayed by a few hundred milliseconds. Ignored on Android and on older iOS versions.                                                                                                                                                                                                 |
 | `onCaptureButtonPressIn`        | Function                               | Callback when iPhone capture button is pressed in or Android volume or camera button is pressed in. Ex: `onCaptureButtonPressIn={() => console.log("volume button pressed in")}`                                                                                                                                                                                                                                                                           |
 | `onCaptureButtonPressOut`       | Function                               | Callback when iPhone capture button is released or Android volume or camera button is released. Ex: `onCaptureButtonPressOut={() => console.log("volume button released")}`                                                                                                                                                                                                                                                                                |
 | **Barcode only**                |
@@ -236,6 +255,11 @@ Additionally, the Camera can be used for barcode scanning
 | `laserColor`                    | Color                                  | Color of barcode scanner laser visualization. Default: `red`                                                                                                                                                                                                                                                                                                                                                                                               |
 | `frameColor`                    | Color                                  | Color of barcode scanner frame visualization. Default: `yellow`                                                                                                                                                                                                                                                                                                                                                                                            |
 | `onReadCode`                    | Function                               | Callback when scanner successfully reads barcode. Returned event contains `codeStringValue`. Default: `null`. Ex: `onReadCode={(event) => console.log(event.nativeEvent.codeStringValue)}`                                                                                                                                                                                                                                                                 |
+| **Face detection (iOS only)**   |
+| `faceDetectionEnabled`          | `boolean`                              | Enable real-time face detection on iOS. Default: `false`. On Android, enabling fires `onFaceDetectionInstallStatus` with `'unavailable'`.                                                                                                                                                                                                                                                  |
+| `faceDetectionThrottleMs`       | `number`                               | Minimum milliseconds between `onFaceDetected` emits. Default: `100`. iOS only.                                                                                                                                                                                                                                                                                                                                                                             |
+| `onFaceDetected`                | Function                               | Callback while face detection is active on iOS, with one entry per detected face (empty array if none).                                                                                                                                                                                                                                                                                    |
+| `onFaceDetectionInstallStatus`  | Function                               | **Android only.** Fires `'unavailable'` when face detection is enabled (not supported in this fork).                                                                                                                                                                                                                                                                                       |
 
 ### detectQRCodeInImage(base64)
 

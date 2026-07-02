@@ -2251,7 +2251,7 @@ PODS:
     - React-perflogger (= 0.81.0)
     - React-utils (= 0.81.0)
     - SocketRocket
-  - ReactNativeCameraKit (17.0.4):
+  - ReactNativeCameraKit (18.0.0):
     - boost
     - DoubleConversion
     - fast_float
