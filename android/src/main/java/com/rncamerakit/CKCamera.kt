@@ -111,6 +111,10 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
     private var barcodeFrameSize: Size? = null
     private var allowedBarcodeTypes: Array<CodeFormat>? = null
 
+    // Face detection props
+    private var faceDetectionEnabled: Boolean = false
+    private var faceDetectionThrottleMs: Long = DEFAULT_FACE_DETECTION_THROTTLE_MS
+
     private fun getActivity() : Activity {
         return currentContext.currentActivity!!
     }
@@ -144,6 +148,14 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
         cameraExecutor.shutdown()
         orientationListener?.disable()
         cameraProvider?.unbindAll()
+    }
+
+    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
+        super.onWindowFocusChanged(hasWindowFocus)
+        if (hasWindowFocus && cameraProvider == null &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            viewFinder.post { setupCamera() }
+        }
     }
 
     override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
@@ -500,6 +512,13 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
             ?.dispatchEvent(ReadCodeEvent(surfaceId, id, decodedValue, CodeFormat.QR.code))
     }
 
+    private fun onFaceDetectionInstallStatus(state: String) {
+        val surfaceId = UIManagerHelper.getSurfaceId(currentContext)
+        UIManagerHelper
+            .getEventDispatcherForReactTag(currentContext, id)
+            ?.dispatchEvent(FaceDetectionInstallStatusEvent(surfaceId, id, state))
+    }
+
     private fun onOrientationChange(orientation: Int) {
         val remappedOrientation = when (orientation) {
             Surface.ROTATION_0 -> RNCameraKitModule.PORTRAIT
@@ -625,6 +644,18 @@ class CKCamera(context: ThemedReactContext) : FrameLayout(context), LifecycleObs
         val restartCamera = enabled != scanBarcode
         scanBarcode = enabled
         if (restartCamera) bindCameraUseCases()
+    }
+
+    fun setFaceDetectionEnabled(enabled: Boolean) {
+        val wasEnabled = faceDetectionEnabled
+        faceDetectionEnabled = enabled
+        if (enabled && !wasEnabled) {
+            onFaceDetectionInstallStatus("unavailable")
+        }
+    }
+
+    fun setFaceDetectionThrottleMs(throttleMs: Int) {
+        faceDetectionThrottleMs = if (throttleMs < 0) DEFAULT_FACE_DETECTION_THROTTLE_MS else throttleMs.toLong()
     }
 
     fun setScanThrottleDelay(delayMs: Int) {
